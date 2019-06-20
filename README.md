@@ -1,4 +1,4 @@
-# Love-Lock-Card
+# Lovelace Love-Lock-Card
 Custom Lovelace card to password protect or lock entire Home Assistant cards. Based upon vertical-stack-in-card.
 
 
@@ -8,11 +8,11 @@ Custom Lovelace card to password protect or lock entire Home Assistant cards. Ba
 # Example
 There are 3 types of locks. Locks are activated when clicking on any card.
 
-Left - Password Protected.
+***Left*** - Password Protected.
 
-Middle - Timeout to fade.
+***Middle*** - Timeout to fade.
 
-Right - Confirm Unlock
+***Right*** - Confirm Unlock
 
 
 ![example](https://i.imgur.com/k35TSKw.gif)
@@ -24,6 +24,8 @@ Right - Confirm Unlock
 | type | string | **Required** | `custom:love-lock-card`
 | cards | list | **Required** | List of cards
 | title | string | **Optional** | Card title
+| popup | string | **Optional** | password, confirm, timeout
+| password | string | **Required** | Only required with popup:password
 
 ## Installation
 

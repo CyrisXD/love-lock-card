@@ -1,5 +1,6 @@
 # Lovelace Love-Lock-Card
-Custom Lovelace card to password protect or lock entire Home Assistant cards. Based upon vertical-stack-in-card.
+Custom Lovelace card to password protect or lock entire Home Assistant cards. Based upon vertical-stack-in-card. 
+This is not a bulletproof method and is just an implementation of [client-side security](https://i.redd.it/1iavece0fp111.jpg). But could be useful against children or flatemates poking where they shouldn't.  
 
 
 #### Please ⭐️ this repo if you find it useful

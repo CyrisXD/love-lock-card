@@ -30,6 +30,12 @@ There are 3 types of locks. Locks are activated when clicking on any card.
 
 ## Installation
 
+### Now available in HACS
+
+![HACS](https://i.imgur.com/1xNjAuC.jpg)
+
+### Manual Install
+
 1. Install the `love-lock-card` card by copying `love-lock-card.js` to `<config directory>/www/love-lock-card.js`
 
 2. Link `love-lock-card` inside your `ui-lovelace.yaml` 

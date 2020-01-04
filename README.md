@@ -1,4 +1,4 @@
-# Lovelace Love-Lock-Card
+# Notice
 This is currently not being worked on for more features but I am happy to accept any pull requests.
 
 # Lovelace Love-Lock-Card

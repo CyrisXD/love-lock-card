@@ -35,7 +35,7 @@ class LoveLockCard extends HTMLElement {
     root.appendChild(wrapper);
 
     // Password
-    var password = '"' + config.password + '"';
+    var password = '"' + encodeURI(config.password) + '"';
 
     // Cover styles
     const coverShow =
@@ -46,7 +46,7 @@ class LoveLockCard extends HTMLElement {
     var passwordScript = `
             var element = this;
             var pass = prompt("Please enter your password");
-            if (pass !== ${password}) {
+            if (encodeURI(pass) !== ${password}) {
                 alert("Invalid Password");
             } else {
                 element.setAttribute("style", ${coverHide});

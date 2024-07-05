@@ -1,20 +1,34 @@
+import { translations } from './translations.js';
+
 class LoveLockCard extends HTMLElement {
   constructor() {
     super();
-    // Make use of shadowRoot to avoid conflicts when reusing
     this.attachShadow({ mode: "open" });
   }
 
   setConfig(config) {
+    this.config = config;
+    if (this.hass) {
+      this.updateCard();
+    }
+  }
+
+  updateCard() {
+    const config = this.config;
+
+    const lang = this.hass && this.hass.selectedLanguage ? this.hass.selectedLanguage :
+                 this.hass && this.hass.language ? this.hass.language : 'en';
+
+    const currentTranslations = translations[lang] || translations['en'];
+
+    const translate = (key) => currentTranslations[key] || translations['en'][key];
+
     if (!config || !config.cards || !Array.isArray(config.cards)) {
-      throw new Error("Card config incorrect");
+      throw new Error(translate("cardConfigIncorrect"));
     }
 
-    // Check if password specified
     if (config.popup == "password" && !config.password) {
-      throw new Error(
-        "Type: Password Selected. You need to specify a password"
-      );
+      throw new Error(translate("passwordRequired"));
     }
 
     this.style.boxShadow =
@@ -22,32 +36,27 @@ class LoveLockCard extends HTMLElement {
     this.style.borderRadius = "var(--ha-card-border-radius, 2px)";
     this.style.background = "var(--paper-card-background-color)";
     this.style.display = "block";
-    // this.style.position = "relative"
 
     const root = this.shadowRoot;
     while (root.hasChildNodes()) {
       root.removeChild(root.lastChild);
     }
 
-    // Wrap main card
     const wrapper = document.createElement("div");
     wrapper.setAttribute("style", "position:relative");
     root.appendChild(wrapper);
 
-    // Password
     var password = '"' + btoa(config.password) + '"';
 
-    // Cover styles
     const coverShow =
       '"position:absolute; top:0; left:0; width:100%; height: 100%; z-index:1000; transition: 1s opacity;"';
     const coverHide = '"display:none; transition: 1s opacity;"';
 
-    // Password Script
     var passwordScript = `
             var element = this;
-            var pass = prompt("Please enter your password");
+            var pass = prompt("${translate("enterPassword")}");
             if (btoa(pass) !== ${password}) {
-                alert("Invalid Password");
+                alert("${translate("invalidPassword")}");
             } else {
                 element.setAttribute("style", ${coverHide});
             }
@@ -56,10 +65,9 @@ class LoveLockCard extends HTMLElement {
             }, 10000)
             `;
 
-    // Confirm Script
     var confirmScript = `
             var element = this;
-            var confirmpopup = confirm("Are you sure you want to unlock?");
+            var confirmpopup = confirm("${translate("confirmUnlock")}");
             if (confirmpopup == true) {
                 this.setAttribute("style", ${coverHide});
             }
@@ -68,7 +76,6 @@ class LoveLockCard extends HTMLElement {
             }, 10000)
             `;
 
-    // Timeout Script
     var timeoutScript = `
             var element = this;
             element.style.opacity = '0';
@@ -79,17 +86,14 @@ class LoveLockCard extends HTMLElement {
                 element.style.opacity = '1';
                 element.setAttribute("style", ${coverShow});
             }, 10000)
-            
            `;
 
-    // Cover the wrapper with lock
     const cover = document.createElement("div");
     cover.setAttribute(
       "style",
       "position:absolute; top:0; left:0; width:100%; height: 100%; z-index:1000; transition: 1s opacity;"
     );
 
-    // Determine which lock/script to use
     if (config.popup == "password") {
       cover.setAttribute("onclick", passwordScript);
     } else if (config.popup == "confirm") {
@@ -98,7 +102,6 @@ class LoveLockCard extends HTMLElement {
       cover.setAttribute("onclick", timeoutScript);
     }
 
-    // Lock Icon
     const lockicon = document.createElement("ha-icon");
     lockicon.setAttribute("icon", "mdi:lock-outline");
     lockicon.setAttribute("style", "position:absolute; top: 10px; right:7px;");
@@ -123,7 +126,6 @@ class LoveLockCard extends HTMLElement {
         element.setConfig(config);
       } catch (err) {
         console.error(tag, err);
-        // return _createError(err.message, config);
       }
       return element;
     };
@@ -175,14 +177,12 @@ class LoveLockCard extends HTMLElement {
 
         wrapper.appendChild(element);
 
-        // Only add cover if specified
         if (config.popup) {
           wrapper.appendChild(cover);
         }
 
         this._refCards.push(element);
       } else {
-        // If element doesn't exist (yet) create an error
         const element = _createError(
           `Custom element doesn't exist: ${tag}.`,
           item
@@ -193,7 +193,6 @@ class LoveLockCard extends HTMLElement {
           element.style.display = "";
         }, 2000);
 
-        // Remove error if element is defined later
         customElements.whenDefined(tag).then(() => {
           clearTimeout(time);
           _fireEvent("ll-rebuild", {}, element);
@@ -206,11 +205,19 @@ class LoveLockCard extends HTMLElement {
   }
 
   set hass(hass) {
+    this._hass = hass;
+    if (this.config) {
+      this.updateCard();
+    }
     if (this._refCards) {
       this._refCards.forEach(card => {
         card.hass = hass;
       });
     }
+  }
+
+  get hass() {
+    return this._hass;
   }
 
   connectedCallback() {
@@ -226,51 +233,50 @@ class LoveLockCard extends HTMLElement {
       }
     });
   }
-
-  _card(element) {
-    if (element.shadowRoot) {
-      if (!element.shadowRoot.querySelector("ha-card")) {
-        let searchEles = element.shadowRoot.getElementById("root");
-        if (!searchEles) {
-          searchEles = element.shadowRoot.getElementById("card");
+    _card(element) {
+      if (element.shadowRoot) {
+        if (!element.shadowRoot.querySelector("ha-card")) {
+          let searchEles = element.shadowRoot.getElementById("root");
+          if (!searchEles) {
+            searchEles = element.shadowRoot.getElementById("card");
+          }
+          if (!searchEles) return;
+          searchEles = searchEles.childNodes;
+  
+          for (let i = 0; i < searchEles.length; i++) {
+            if (searchEles[i].style !== undefined) {
+              searchEles[i].style.margin = "0px";
+            }
+            this._card(searchEles[i]);
+          }
+        } else {
+          element.shadowRoot.querySelector("ha-card").style.boxShadow = "none";
         }
-        if (!searchEles) return;
-        searchEles = searchEles.childNodes;
-
+      } else {
+        if (
+          typeof element.querySelector === "function" &&
+          element.querySelector("ha-card")
+        ) {
+          element.querySelector("ha-card").style.boxShadow = "none";
+        }
+        let searchEles = element.childNodes;
         for (let i = 0; i < searchEles.length; i++) {
-          if (searchEles[i].style !== undefined) {
+          if (searchEles[i] && searchEles[i].style) {
             searchEles[i].style.margin = "0px";
           }
           this._card(searchEles[i]);
         }
-      } else {
-        element.shadowRoot.querySelector("ha-card").style.boxShadow = "none";
-      }
-    } else {
-      if (
-        typeof element.querySelector === "function" &&
-        element.querySelector("ha-card")
-      ) {
-        element.querySelector("ha-card").style.boxShadow = "none";
-      }
-      let searchEles = element.childNodes;
-      for (let i = 0; i < searchEles.length; i++) {
-        if (searchEles[i] && searchEles[i].style) {
-          searchEles[i].style.margin = "0px";
-        }
-        this._card(searchEles[i]);
       }
     }
+  
+    getCardSize() {
+      let totalSize = 0;
+      this._refCards.forEach(element => {
+        totalSize +=
+          typeof element.getCardSize === "function" ? element.getCardSize() : 1;
+      });
+      return totalSize;
+    }
   }
-
-  getCardSize() {
-    let totalSize = 0;
-    this._refCards.forEach(element => {
-      totalSize +=
-        typeof element.getCardSize === "function" ? element.getCardSize() : 1;
-    });
-    return totalSize;
-  }
-}
-
-customElements.define("love-lock-card", LoveLockCard);
+  
+  customElements.define("love-lock-card", LoveLockCard);

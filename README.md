@@ -88,6 +88,14 @@ cards:
     type: light
 ```
 
+### How to add translation
+
+Only a native speaker can translate to a specific language.
+
+1. Go to the `translations.js` file
+2. Add the appropriate [ISO 639](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes) language code
+3. Copy the property and add the relevant translation
+
 # Credits
 Idea comes from [Thomasloven's lovelace-toggle-lock-entity-row](https://github.com/thomasloven/lovelace-toggle-lock-entity-row)
 

@@ -31,7 +31,7 @@ class LoveLockCard extends HTMLElement {
 
     // Wrap main card
     const wrapper = document.createElement("div");
-    wrapper.setAttribute("style", "position:relative");
+    wrapper.setAttribute("style", "position:relative; isolation:isolate");
     root.appendChild(wrapper);
 
     // Password
